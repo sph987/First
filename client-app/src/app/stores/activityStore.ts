@@ -13,8 +13,23 @@ class ActivityStore {
   @observable target = "";
 
   @computed get activitiesByDate() {
-    return Array.from(this.activityRegistry.values()).sort(
+    return this.groupActivitiesByDates(
+      Array.from(this.activityRegistry.values())
+    );
+  }
+
+  groupActivitiesByDates(activities: IActivity[]) {
+    const sortedActivities = activities.sort(
       (a, b) => Date.parse(b.date) - Date.parse(a.date)
+    );
+    return Object.entries(
+      sortedActivities.reduce((activities, activity) => {
+        const date = activity.date.split("T")[0];
+        activities[date] = activities[date]
+          ? [...activities[date], activity]
+          : [activity];
+        return activities;
+      }, {} as { [key: string]: IActivity[] })
     );
   }
 
@@ -29,6 +44,7 @@ class ActivityStore {
           this.loadingInitial = false;
         });
       });
+      console.log(this.groupActivitiesByDates(activities));
     } catch (error) {
       runInAction("load activities in error", () => {
         this.loadingInitial = false;
@@ -37,33 +53,34 @@ class ActivityStore {
     }
   };
 
-@action loadActivity = async (id:string) =>{
-   let activity = this.getActivity(id);
-   if(activity){ this.activity = activity}
-   else{
-    this.loadingInitial = true;
-    try {
-      activity = await agent.Activities.details(id);
-      runInAction('gettting activity',()=>{
-        this.activity = activity;
-        this.loadingInitial = false;
-      })
-    } catch (error) {
-      runInAction('get activity error',()=>{
-        this.loadingInitial=false;
-      })
-      console.log(error);
+  @action loadActivity = async (id: string) => {
+    let activity = this.getActivity(id);
+    if (activity) {
+      this.activity = activity;
+    } else {
+      this.loadingInitial = true;
+      try {
+        activity = await agent.Activities.details(id);
+        runInAction("gettting activity", () => {
+          this.activity = activity;
+          this.loadingInitial = false;
+        });
+      } catch (error) {
+        runInAction("get activity error", () => {
+          this.loadingInitial = false;
+        });
+        console.log(error);
+      }
     }
-   }
-}
+  };
 
-@action clearActivity= () =>{
-  this.activity = null;
-}
+  @action clearActivity = () => {
+    this.activity = null;
+  };
 
-getActivity = (id:string)=>{
-  return this.activityRegistry.get(id);
-}
+  getActivity = (id: string) => {
+    return this.activityRegistry.get(id);
+  };
 
   @action createActivity = async (activity: IActivity) => {
     this.submitting = true;
