@@ -11,5 +11,7 @@ namespace domain
         public DateTime Date { get; set; }
         public string City { get; set; }
         public string Venue { get; set; }
+        public string RandomString {get;set;}
+        
     }
 }

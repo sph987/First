@@ -23,7 +23,7 @@ const ActivityDashboard: React.FC = () => {
         <h1>activitiy filters</h1>
       </Grid.Column>
     </Grid>
-  );
+  )
 };
 
 export default observer(ActivityDashboard);
