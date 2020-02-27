@@ -73,12 +73,6 @@ const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({
     console.log(values);
   }
 
-  const handleInputChange = (
-    event: FormEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.currentTarget;
-    setActivity({ ...activity, [name]: value });
-  };
 
   return (
     <Grid>
@@ -95,34 +89,32 @@ const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({
               value={activity.title}
               component={TextInput}
             />
-            <Form.TextArea
-              onChange={handleInputChange}
+            <Field
               name="description"
-              rows={2}
               placeholder="Description"
               value={activity.description}
+              component={TextInput}
             />
-            <Form.Input
-              onChange={handleInputChange}
+            <Field
+            component={TextInput}
               name="category"
               placeholder="Category"
               value={activity.category}
             />
-            <Form.Input
-              onChange={handleInputChange}
+            <Field
+              component={TextInput}
               name="date"
-              type="datetime-local"
               placeholder="Date"
               value={activity.date}
             />
-            <Form.Input
-              onChange={handleInputChange}
+            <Field
+            component={TextInput}
               name="city"
               placeholder="City"
               value={activity.city}
             />
-            <Form.Input
-              onChange={handleInputChange}
+            <Field
+              component={TextInput}
               name="venue"
               placeholder="Venue"
               value={activity.venue}
