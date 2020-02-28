@@ -48,28 +48,20 @@ const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({
     }
   }, [loadActivity, match.params.id]);
 
-  // const handleSubmit = () => {
-  //   if (activity.id.length === 0) {
-  //     let newActivity = {
-  //       ...activity,
-  //       id: uuid()
-  //     };
-  //     createActivity(newActivity).then(() =>
-  //       history.push(`/activities/${newActivity.id}`)
-  //     );
-  //   } else {
-  //     editActivity(activity).then(() =>
-  //       history.push(`/activities/${activity.id}`)
-  //     );
-  //   }
-  // };
-
   const handleFinalFormSubmit = (values: any) => {
     const dateAndTime = combineDateAndTime(values.date, values.time);
     const { date, time, ...activity } = values;
     activity.date = dateAndTime;
 
-    console.log(activity);
+    if (!activity.id) {
+      let newActivity = {
+        ...activity,
+        id: uuid()
+      };
+      createActivity(newActivity);
+    } else {
+      editActivity(activity);
+    }
   };
 
   return (
@@ -136,10 +128,14 @@ const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({
                   positive
                   type="submit"
                   content="Submit"
-                  disabled = {loading}
+                  disabled={loading}
                 />
                 <Button
-                  onClick={() => history.push("/activities")}
+                  onClick={
+                    activity.id
+                      ? () => history.push(`/activities/${activity.id}`)
+                      : () => history.push("/activities")
+                  }
                   floated="right"
                   type="button"
                   content="Cancel"
