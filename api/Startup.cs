@@ -1,8 +1,12 @@
+using System.Text;
 using api.Middleware;
 using application.Activities;
+using application.Interfaces;
 using domain;
 using FluentValidation.AspNetCore;
+using Infrastructure.Security;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using persistence;
 
 namespace api
@@ -26,12 +31,13 @@ namespace api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(opt=>{
+            services.AddDbContext<DataContext>(opt =>
+            {
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddCors(opts=>
+            services.AddCors(opts =>
             {
-                opts.AddPolicy("CorsPolicy", policy=>
+                opts.AddPolicy("CorsPolicy", policy =>
                 {
                     policy.AllowAnyHeader()
                     .AllowAnyMethod()
@@ -41,7 +47,8 @@ namespace api
             );
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddControllers()
-            .AddFluentValidation(configurationExpression=>{
+            .AddFluentValidation(configurationExpression =>
+            {
                 configurationExpression.RegisterValidatorsFromAssemblyContaining<Create>();
             });
 
@@ -50,7 +57,21 @@ namespace api
             identityBuilder.AddEntityFrameworkStores<DataContext>();
             identityBuilder.AddSignInManager<SignInManager<AppUser>>();
 
-            services.AddAuthentication();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super secret key"));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(opt =>
+            {
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateAudience = false,
+                    ValidateIssuer = false
+                };
+            });
+
+            services.AddScoped<IJwtGenerator, JwtGenerator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,15 +84,17 @@ namespace api
                 //app.UseDeveloperExceptionPage();
             }
 
-            
+
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseCors("CorsPolicy"); 
+                       
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors("CorsPolicy");
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
