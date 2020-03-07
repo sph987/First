@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using application.Errors;
 using application.Interfaces;
+using application.Validators;
 using domain;
 using FluentValidation;
 using MediatR;
@@ -30,10 +31,8 @@ namespace application.User
             {
                 RuleFor(x => x.DisplayName).NotEmpty();
                 RuleFor(x => x.Username).NotEmpty();
-                RuleFor(x => x.Email).NotEmpty();
-                RuleFor(x => x.Password).NotEmpty();
-
-
+                RuleFor(x => x.Email).NotEmpty().EmailAddress();
+                RuleFor(x => x.Password).Password();
             }
         }
 
