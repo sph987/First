@@ -23,7 +23,11 @@ namespace application.Activities
             public async Task<List<Activity>> Handle(Query request,
                 CancellationToken cancellationToken)
             {
-                var activities = await  _context.Activities.ToListAsync();
+                var activities = await _context.Activities
+                    .Include(a => a.UserActivities)
+                    .ThenInclude(a => a.AppUser)
+                    .ToListAsync();
+                    
                 return activities;
             }
         }
