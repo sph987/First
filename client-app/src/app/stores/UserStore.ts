@@ -3,8 +3,6 @@ import { observable, computed, action, runInAction } from "mobx";
 import agent from "../api/agent";
 import { RootStore } from "./rootStore";
 import { history } from "../..";
-import { act } from "react-dom/test-utils";
-import { getNextId } from "mobx/lib/internal";
 
 export default class UserStore {
   rootStore: RootStore;

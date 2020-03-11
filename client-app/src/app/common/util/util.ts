@@ -1,10 +1,32 @@
-export const combineDateAndTime = (date:Date, time: Date) => {
-    const timeString = time.getHours() + ':' + time.getMinutes() + ':00';
+import { IActivity, IAttendee } from "../../models/activity";
+import { IUser } from "../../models/user";
 
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const dateSTring = `${year}-${month}-${day}`;
+export const combineDateAndTime = (date: Date, time: Date) => {
+  const timeString = time.getHours() + ":" + time.getMinutes() + ":00";
 
-    return new Date(dateSTring + ' ' + timeString);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const dateSTring = `${year}-${month}-${day}`;
+
+  return new Date(dateSTring + " " + timeString);
+};
+
+export const setActivityProps = (activity: IActivity, user: IUser) => {
+  activity.date = new Date(activity.date);
+  activity.isGoing = activity.attendees.some(a => a.username === user.username);
+  activity.isHost = activity.attendees.some(
+    a => a.username === user.username && a.isHost
+  );  
+  return activity;
+};
+
+
+export const createAttendee = (user: IUser) : IAttendee => {
+    return {
+        displayName: user.displayName,
+        isHost : false,
+        username:user.username,
+        image : user.image!
+    }
 }
