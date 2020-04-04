@@ -13,7 +13,7 @@ interface RouteParams {
 
 interface IProps extends RouteComponentProps<RouteParams> {}
 
-export const ProfilePage: React.FC<IProps> = ({match}) => {
+ const ProfilePage: React.FC<IProps> = ({match}) => {
     const rootStore = useContext(RootStoreContext);
     const {loadingProfile, profile, loadProfile} = rootStore.profileStore;
 
