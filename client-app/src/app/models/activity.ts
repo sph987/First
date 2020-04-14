@@ -1,3 +1,5 @@
+import { StreamInvocationMessage } from "@microsoft/signalr"
+
 export interface IActivity {
     id: string;
     title: string;
@@ -9,6 +11,16 @@ export interface IActivity {
     isGoing: boolean;
     isHost: boolean;
     attendees: IAttendee[];
+    comments: IComment[];
+}
+
+export interface IComment {
+    id: String;
+    createdAt:Date;
+    body: string;
+    username: string;
+    displayName: string;
+    image: string;
 }
 
 export interface IactivityFormValues extends Partial<IActivity> {

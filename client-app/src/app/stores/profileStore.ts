@@ -30,7 +30,6 @@ export default class ProfileStore {
       runInAction(() => {
         this.profile = profile;
         this.loadingProfile = false;
-        console.log("completed loading profile without error");
       });
     } catch (error) {
       runInAction(() => {
@@ -38,11 +37,22 @@ export default class ProfileStore {
       });
       console.log(error);
     }
-
-    console.log(`completed loading profile. loadingProfile set to ${this.loadingProfile}
-                        profile is ${this.profile?.displayName}
-            `);
   };
+
+  @action updateProfile = async (profile: Partial<IProfile>) => {
+    try {
+
+      await agent.Profiles.updateProfile(profile);
+      runInAction(() =>{
+        if(profile.displayName !== this.rootStore.userStore.user!.displayName){
+          this.rootStore.userStore.user!.displayName = profile.displayName!;
+        }
+        this.profile = {...this.profile!, ...profile};
+      })
+    } catch (error) {
+      toast.error('Problem updating profile');
+    }
+  }
 
   @action uploadPhoto = async (file: Blob) => {
     this.uploadingPhoto = true;

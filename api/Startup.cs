@@ -1,5 +1,7 @@
 using System.Text;
+using System.Threading.Tasks;
 using api.Middleware;
+using api.SignalR;
 using application.Activities;
 using application.Interfaces;
 using AutoMapper;
@@ -46,15 +48,16 @@ namespace api
                 {
                     policy.AllowAnyHeader()
                     .AllowAnyMethod()
-                    .WithOrigins("http://localhost:3000");
+                    .WithOrigins("http://localhost:3000").AllowCredentials();
                 });
             }
             );
 
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddAutoMapper(typeof(List.Handler));
-
-            services.AddControllers(opt =>{
+            services.AddSignalR();
+            services.AddControllers(opt =>
+            {
                 var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                 opt.Filters.Add(new AuthorizeFilter(policy));
             })
@@ -68,8 +71,10 @@ namespace api
             identityBuilder.AddEntityFrameworkStores<DataContext>();
             identityBuilder.AddSignInManager<SignInManager<AppUser>>();
 
-            services.AddAuthorization(opt=> {
-                opt.AddPolicy("IsActivityHost", policy =>{
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsActivityHost", policy =>
+                {
                     policy.Requirements.Add(new IsHostRequirement());
                 });
             });
@@ -86,6 +91,20 @@ namespace api
                     IssuerSigningKey = key,
                     ValidateAudience = false,
                     ValidateIssuer = false
+                };
+                opt.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) 
+                            && (path.StartsWithSegments("/chat")))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -110,8 +129,8 @@ namespace api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseCors("CorsPolicy"); 
-                       
+            app.UseCors("CorsPolicy");
+
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -119,6 +138,7 @@ namespace api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chat");
             });
         }
     }
