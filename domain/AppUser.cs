@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,5 +10,8 @@ namespace domain
         public string Bio { get; set; }
         public virtual ICollection<UserActivity> UserActivities { get; set; }
         public virtual ICollection<Photo> Photos { get; set; }
+        public virtual ICollection<UserFollowing> Followings { get; set; }
+        public virtual ICollection<UserFollowing> Followers { get; set; }
+
     }
 }
